@@ -92,7 +92,6 @@
   pre.output .err{color:#FF8B6B;}
   pre.output .dim{color:#7E828C;}
 
-  /* result card */
   .result{border-radius:16px; padding:18px 20px; border:1px solid var(--line);
     background:var(--paper);}
   .result[hidden]{display:none;}
@@ -114,6 +113,23 @@
   .result.notyet .head{color:#8A6200;}
   .result.error .badge{background:#FF8B6B; color:#3a1409;}
   .result.error .head{color:#a23d1f;}
+
+  /* hints */
+  .hints{margin-top:16px; border-top:1px solid rgba(0,0,0,.09); padding-top:14px;}
+  .hints .stuck{font-family:"JetBrains Mono",monospace; font-size:11px; text-transform:uppercase;
+    letter-spacing:1px; color:var(--muted); display:block; margin-bottom:10px;}
+  .hint{background:#FFF; border:1px solid var(--line); border-left:3px solid var(--honey);
+    border-radius:10px; padding:10px 13px; margin-bottom:8px; font-size:13.5px;
+    color:#33363D; line-height:1.5;}
+  .hint b{font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--honey-press);
+    display:block; margin-bottom:3px; letter-spacing:.5px;}
+  .hint-btn{font-family:"Space Grotesk",sans-serif; font-weight:600; font-size:13px;
+    background:#FFF; color:var(--honey-press); border:1px solid var(--honey);
+    border-radius:9px; padding:7px 14px; cursor:pointer; transition:background .15s ease;}
+  .hint-btn:hover{background:#FFF7E6;}
+  .hint-btn:active{transform:scale(.97);}
+  .hint-btn:focus-visible{outline:3px solid var(--honey); outline-offset:2px;}
+  .hints .done{font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--muted);}
 
   .fade{animation:fade .18s ease;}
   @keyframes fade{from{opacity:.3;} to{opacity:1;}}
@@ -192,10 +208,17 @@ print(1)</textarea>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
 
 <script>
-  // ----- challenge definition (this is the data that will later live in lesson files) -----
+  // ----- challenge data (this whole block is what Stage 5 will load from lesson files) -----
   const CHALLENGE = {
-    expectedOutput: "1\n2\n3"
+    expectedOutput: "1\n2\n3",
+    hints: [
+      "Each print() call automatically moves to a new line. So how many separate print() calls do you need to make three lines?",
+      "You already have print(1). Add two more lines directly below it, one for 2 and one for 3, following the exact same pattern.",
+      "Write three statements, each on its own line: print(1), then print(2), then print(3). Make sure the numbers have no quotes around them, or they will print as text instead of numbers."
+    ]
   };
+
+  let hintsRevealed = 0;
 
   const editor = CodeMirror.fromTextArea(document.getElementById("code"), {
     mode:"python", theme:"material-darker", lineNumbers:true, indentUnit:4, tabSize:4
@@ -217,15 +240,12 @@ print(1)</textarea>
     runLabel.textContent = (b && who==="run") ? "Running…" : "Run";
     checkLabel.textContent = (b && who==="check") ? "Checking…" : "Check answer";
   }
-
-  // normalize output so trailing spaces / blank lines don't cause false fails
   function normalize(s){
     return String(s).replace(/\r\n/g,"\n").split("\n")
       .map(l => l.replace(/\s+$/,"")).join("\n")
       .replace(/\n+$/,"").replace(/^\n+/,"");
   }
 
-  // ----- Python engine (loads once, on first use) -----
   let pyodidePromise = null;
   async function getPython(){
     if(!pyodidePromise){
@@ -246,7 +266,6 @@ print(1)</textarea>
     }
   }
 
-  // ----- Run: just show output -----
   async function handleRun(){
     setBusy(true,"run"); resultEl.hidden = true;
     try{
@@ -261,13 +280,11 @@ print(1)</textarea>
     }finally{ setBusy(false); }
   }
 
-  // ----- Check: run, then grade output against the expected result -----
   async function handleCheck(){
     setBusy(true,"check");
     try{
       const r = await runCode();
 
-      // 1) code crashed — fix the error before grading
       if(!r.ok){
         showOutput(escapeHtml(r.output) + '<span class="err">' + escapeHtml(r.error) + '</span>');
         renderResult("error", "Fix the error first",
@@ -277,12 +294,12 @@ print(1)</textarea>
 
       showOutput(r.output && r.output.trim().length ? escapeHtml(r.output) : '<span class="dim">Code ran — no output to show.</span>');
 
-      // 2) compare to the expected output
       if(normalize(r.output) === normalize(CHALLENGE.expectedOutput)){
+        hintsRevealed = 0;
         renderResult("correct", "Correct", "Your output matches exactly. Nicely done.");
       }else{
         renderResult("notyet", "Not quite yet",
-          "Your output doesn't match the target. Compare the two below — look for missing lines, extra text, or things on the same line that should be split.",
+          "Your output doesn't match the target. Compare the two below, then reveal a hint if you need a nudge.",
           { expected: CHALLENGE.expectedOutput, got: r.output });
       }
     }catch(e){
@@ -291,25 +308,52 @@ print(1)</textarea>
   }
 
   function renderResult(kind, heading, message, cmp){
-    let html = '<div class="head"><span class="badge">'
-      + (kind==="correct" ? "PASS" : kind==="notyet" ? "TRY AGAIN" : "ERROR")
-      + '</span>' + escapeHtml(heading) + '</div><p>' + escapeHtml(message) + '</p>';
+    const badge = kind==="correct" ? "PASS" : kind==="notyet" ? "TRY AGAIN" : "ERROR";
+    let html = '<div class="head"><span class="badge">' + badge + '</span>' + escapeHtml(heading) + '</div><p>' + escapeHtml(message) + '</p>';
     if(cmp){
       html += '<div class="cmp">'
         + '<div class="box"><span class="lbl">Target output</span><pre>' + escapeHtml(normalize(cmp.expected)) + '</pre></div>'
-        + '<div class="box"><span class="lbl">Your output</span><pre>' + (cmp.got && cmp.got.trim().length ? escapeHtml(normalize(cmp.got)) : '<span class="dim">(nothing printed)</span>') + '</pre></div>'
+        + '<div class="box"><span class="lbl">Your output</span><pre>' + (cmp.got && cmp.got.trim().length ? escapeHtml(normalize(cmp.got)) : '(nothing printed)') + '</pre></div>'
         + '</div>';
     }
+    const hasHints = kind==="notyet" && CHALLENGE.hints && CHALLENGE.hints.length;
+    if(hasHints){ html += '<div class="hints" id="hintsWrap"></div>'; }
+
     resultEl.className = "result fade " + kind;
     resultEl.innerHTML = html;
     resultEl.hidden = false;
     void resultEl.offsetWidth;
+
+    if(hasHints){ updateHints(); }
+  }
+
+  function updateHints(){
+    const wrap = document.getElementById("hintsWrap");
+    if(!wrap) return;
+    let h = '<span class="stuck">Need a hint?</span>';
+    for(let i=0;i<hintsRevealed;i++){
+      h += '<div class="hint"><b>Hint ' + (i+1) + '</b>' + escapeHtml(CHALLENGE.hints[i]) + '</div>';
+    }
+    if(hintsRevealed < CHALLENGE.hints.length){
+      const last = hintsRevealed === CHALLENGE.hints.length - 1;
+      const label = hintsRevealed === 0 ? "Show a hint" : (last ? "Show the explanation" : "Show next hint");
+      h += '<button class="hint-btn" id="hintBtn">' + label + '</button>';
+    }else{
+      h += '<span class="done">That is every hint. Give it another go.</span>';
+    }
+    wrap.innerHTML = h;
+    const b = document.getElementById("hintBtn");
+    if(b){
+      b.addEventListener("click", function(){
+        hintsRevealed = Math.min(hintsRevealed + 1, CHALLENGE.hints.length);
+        updateHints();
+      });
+    }
   }
 
   runBtn.addEventListener("click", handleRun);
   checkBtn.addEventListener("click", handleCheck);
-  editor.setOption("extraKeys", { "Ctrl-Enter": handleRun, "Cmd-Enter": handleRun,
-    "Shift-Enter": handleCheck });
+  editor.setOption("extraKeys", { "Ctrl-Enter": handleRun, "Cmd-Enter": handleRun, "Shift-Enter": handleCheck });
 </script>
 </body>
 </html>
