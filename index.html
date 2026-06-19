@@ -399,8 +399,10 @@
     return pyodidePromise;
   }
   const PY_STDOUT =
-    "import sys, io\n" +
-    "sys.stdout = sys.stderr = io.StringIO()\n";
+    "import sys, io, warnings\n" +
+    "warnings.simplefilter('ignore')\n" +
+    "sys.stdout = io.StringIO()\n" +
+    "sys.stderr = io.StringIO()\n";
   const PY_GUARD =
     "_pg_n = 0\n" +
     "def _pg_guard(f, e, a):\n" +
