@@ -143,6 +143,9 @@
   .result.error .badge{background:#FF8B6B; color:#3a1409;}
   .result.error .head{color:#a23d1f;}
   .result .next{margin-top:12px;}
+  .result .errline{margin:10px 0 0; font-family:"JetBrains Mono",monospace; font-size:12.5px;
+    background:var(--ink); color:#FFB37A; padding:10px 12px; border-radius:10px; white-space:pre-wrap; word-break:break-word;}
+  .CodeMirror .cm-error{color:#FFB37A !important; background:rgba(255,139,107,.10); border-radius:3px;}
 
   .hints{margin-top:16px; border-top:1px solid rgba(0,0,0,.09); padding-top:14px;}
   .hints .stuck{font-family:"JetBrains Mono",monospace; font-size:11px; text-transform:uppercase;
@@ -283,6 +286,40 @@
     return String(s).replace(/\r\n/g,"\n").split("\n").map(l => l.replace(/\s+$/,"")).join("\n")
       .replace(/\n+$/,"").replace(/^\n+/,"");
   }
+  // turn a raw Python error into a plain-language explanation
+  function friendlyError(raw){
+    const text = String(raw || "");
+    const lines = text.split("\n").map(s => s.trim()).filter(Boolean);
+    let headline = "";
+    for(let i=lines.length-1;i>=0;i--){ if(/Error|Exception/.test(lines[i])){ headline = lines[i]; break; } }
+    if(!headline){ headline = lines.length ? lines[lines.length-1] : "Something went wrong."; }
+
+    let explain = "Your code hit an error. The exact message is shown below.";
+    if(/endless loop|ran too long/i.test(text))
+      explain = "Your loop didn't stop. A while-loop repeats until its condition becomes False — make sure something inside the loop changes that condition, like increasing or decreasing a counter each time.";
+    else if(/expected an indented block/.test(text))
+      explain = "Python expected indented code here. After a line that ends with a colon ( : ) — an if, for, while, or def — the next line must be pushed in by 4 spaces.";
+    else if(/unexpected indent/.test(text))
+      explain = "There's an unexpected indent. A line is pushed in further than Python expects. Only the lines inside an if, for, while, or function get indented (4 spaces); everything else lines up at the far left.";
+    else if(/expected ':'/.test(text))
+      explain = "A colon is missing. Lines that begin a block — if, elif, else, for, while, def — must end with a colon ( : ).";
+    else if(/unterminated string/.test(text))
+      explain = "A quote is missing. Every opening quote needs a matching closing quote on the same line.";
+    else if(/was never closed/.test(text))
+      explain = "A bracket was opened but never closed. Check that every ( has a matching ).";
+    else if(/is not defined/.test(text)){
+      const m = text.match(/name '([^']+)' is not defined/);
+      explain = "Python doesn't recognise " + (m ? "the name '" + m[1] + "'" : "a name") + ". Check the spelling, make sure you created it with = before using it, and remember text needs quotes around it.";
+    }
+    else if(/TypeError/.test(text))
+      explain = "A type mismatch — usually mixing text and numbers. Convert with str() or int() so both sides are the same type.";
+    else if(/IndentationError/.test(text))
+      explain = "An indentation problem — the spacing at the start of a line isn't what Python expects. Indent 4 spaces inside a block; line everything else up at the left.";
+    else if(/SyntaxError/.test(text))
+      explain = "A syntax error — a typo in the code's structure. Check the brackets, quotes, and colons on the highlighted line.";
+
+    return { headline: headline, explain: explain };
+  }
   let savedTimer;
   function flashSaved(){ savedTag.classList.add("show"); clearTimeout(savedTimer);
     savedTimer = setTimeout(()=> savedTag.classList.remove("show"), 1100); }
@@ -355,14 +392,28 @@
     }
     return pyodidePromise;
   }
+  const PY_SETUP =
+    "import sys, io\n" +
+    "sys.stdout = sys.stderr = io.StringIO()\n" +
+    "_pg_n = 0\n" +
+    "def _pg_guard(f, e, a):\n" +
+    "    global _pg_n\n" +
+    "    _pg_n += 1\n" +
+    "    if _pg_n > 1500000:\n" +
+    "        raise RuntimeError(\"This looks like an endless loop. It ran too long \\u2014 make sure the loop's condition eventually becomes False, for example by changing a counter inside the loop.\")\n" +
+    "    return _pg_guard\n" +
+    "sys.settrace(_pg_guard)\n";
+
   async function runCode(){
     const py = await getPython();
-    py.runPython("import sys, io\nsys.stdout = sys.stderr = io.StringIO()");
+    py.runPython(PY_SETUP);
     try{
       await py.runPythonAsync(editor.getValue());
       return { ok:true, output: py.runPython("sys.stdout.getvalue()") };
     }catch(err){
       return { ok:false, output: py.runPython("sys.stdout.getvalue()") || "", error:String(err.message||err) };
+    }finally{
+      try{ py.runPython("import sys\nsys.settrace(None)"); }catch(e){}
     }
   }
 
@@ -384,9 +435,9 @@
     try{
       const r = await runCode();
       if(!r.ok){
-        showOutput(escapeHtml(r.output) + '<span class="err">' + escapeHtml(r.error) + '</span>');
-        renderResult("error", "Fix the error first",
-          "Your code hit an error, so it can't be checked yet. The red message in the output panel says what went wrong.");
+        const fe = friendlyError(r.error);
+        showOutput((r.output && r.output.length ? escapeHtml(r.output) : '') + '<span class="err">' + escapeHtml(r.error || fe.headline) + '</span>');
+        renderResult("error", "Fix the error first", fe.explain, null, false, fe.headline);
         return;
       }
       showOutput(r.output && r.output.trim().length ? escapeHtml(r.output) : '<span class="dim">Code ran — no output to show.</span>');
@@ -408,9 +459,10 @@
     finally{ setBusy(false); }
   }
 
-  function renderResult(kind, heading, message, cmp, showNext){
+  function renderResult(kind, heading, message, cmp, showNext, detail){
     const badge = kind==="correct" ? "PASS" : kind==="notyet" ? "TRY AGAIN" : "ERROR";
     let html = '<div class="head"><span class="badge">'+badge+'</span>'+escapeHtml(heading)+'</div><p>'+escapeHtml(message)+'</p>';
+    if(detail){ html += '<pre class="errline">'+escapeHtml(detail)+'</pre>'; }
     if(cmp){
       html += '<div class="cmp">'
         + '<div class="box"><span class="lbl">Target output</span><pre>'+escapeHtml(normalize(cmp.expected))+'</pre></div>'

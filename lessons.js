@@ -416,6 +416,268 @@ window.LESSONS = [
       "Put that whole thing after if, ending with a colon.",
       "if plays > 100 and not explicit:\n    print(\"Featured\")\nelse:\n    print(\"Skip\")"
     ]
+  },
+
+  /* ---------- Module 8 · Lists ---------- */
+  {
+    id: "p2-list-1",
+    module: "8 · Lists",
+    title: "A list holds many values",
+    concept:
+      "<p>Until now a variable held one value. A <b>list</b> holds many, in order, inside square brackets <code>[ ]</code>, separated by commas.</p>" +
+      "<p>Printing a whole list shows it with its brackets and quotes.</p>",
+    task: "<p>Make a list called <code>songs</code> containing <code>\"Bohemian Rhapsody\"</code> and <code>\"We Will Rock You\"</code>, then print the whole list:</p><pre>['Bohemian Rhapsody', 'We Will Rock You']</pre>",
+    starter: "# Make a list of two songs, then print the list\nsongs = \n",
+    expected: "['Bohemian Rhapsody', 'We Will Rock You']",
+    hints: [
+      "Put both titles inside square brackets, separated by a comma. Each title needs quotes.",
+      "songs = [\"Bohemian Rhapsody\", \"We Will Rock You\"]",
+      "Then on the next line: print(songs)"
+    ]
+  },
+  {
+    id: "p2-list-2",
+    module: "8 · Lists",
+    title: "Getting one item out",
+    concept:
+      "<p>Each item has a position number called an <b>index</b>. Counting starts at <b>0</b>, so the first item is <code>songs[0]</code>, the second is <code>songs[1]</code>, and so on.</p>",
+    task: "<p>From the list below, print just the <b>first</b> song:</p><pre>Bohemian Rhapsody</pre>",
+    starter: "songs = [\"Bohemian Rhapsody\", \"We Will Rock You\"]\n# Print the first song (remember: counting starts at 0)\n",
+    expected: "Bohemian Rhapsody",
+    hints: [
+      "Use square brackets with the index number after the list name.",
+      "The first item is at index 0, not 1.",
+      "print(songs[0])"
+    ]
+  },
+  {
+    id: "p2-list-3",
+    module: "8 · Lists",
+    title: "How many items?",
+    concept: "<p><code>len()</code> counts how many items are in a list — useful for \"how many songs do I have?\"</p>",
+    task: "<p>Print how many songs are in this list:</p><pre>3</pre>",
+    starter: "songs = [\"Bohemian Rhapsody\", \"We Will Rock You\", \"Somebody to Love\"]\n# Print how many songs are in the list\n",
+    expected: "3",
+    hints: [
+      "Wrap the list in len().",
+      "Put len(songs) inside print().",
+      "print(len(songs))"
+    ]
+  },
+  {
+    id: "p2-list-4",
+    module: "8 · Lists",
+    title: "Adding to a list",
+    concept:
+      "<p><code>.append()</code> adds a new item to the end of a list. The list grows by one.</p>" +
+      "<p>After adding a third song, its index is <code>2</code> (because counting started at 0).</p>",
+    task: "<p>Add <code>\"Somebody to Love\"</code> to the list, then print the item at index 2 to confirm it landed:</p><pre>Somebody to Love</pre>",
+    starter: "songs = [\"Bohemian Rhapsody\", \"We Will Rock You\"]\n# Append a third song, then print songs[2]\n",
+    expected: "Somebody to Love",
+    hints: [
+      "Use songs.append(\"...\") to add the new title.",
+      "Then print the item at index 2.",
+      "songs.append(\"Somebody to Love\")\nprint(songs[2])"
+    ]
+  },
+
+  /* ---------- Module 9 · For-loops ---------- */
+  {
+    id: "p2-for-1",
+    module: "9 · For-loops",
+    title: "Doing something to every item",
+    concept:
+      "<p>A <code>for</code> loop runs the same code once for each item in a list. The pattern is <code>for item in list:</code>, with the repeated code indented underneath.</p>" +
+      "<p>The name after <code>for</code> (here, <code>song</code>) holds each item in turn.</p>",
+    task: "<p>Loop through the list and print every song, one per line:</p><pre>Bohemian Rhapsody\nWe Will Rock You\nSomebody to Love</pre>",
+    starter: "songs = [\"Bohemian Rhapsody\", \"We Will Rock You\", \"Somebody to Love\"]\n# Loop through songs and print each one\n",
+    expected: "Bohemian Rhapsody\nWe Will Rock You\nSomebody to Love",
+    hints: [
+      "Write: for song in songs:  ending with a colon.",
+      "Indent the print 4 spaces underneath.",
+      "for song in songs:\n    print(song)"
+    ]
+  },
+  {
+    id: "p2-for-2",
+    module: "9 · For-loops",
+    title: "Looping over a range of numbers",
+    concept:
+      "<p><code>range(1, 4)</code> produces the numbers 1, 2, 3 — it stops <b>before</b> the second number. Looping over a range lets you repeat something a set number of times.</p>",
+    task: "<p>Use a for-loop with <code>range</code> to print:</p><pre>1\n2\n3</pre>",
+    starter: "# Loop over range(1, 4) and print each number\n",
+    expected: "1\n2\n3",
+    hints: [
+      "Write: for n in range(1, 4):  — note it stops before 4.",
+      "Indent the print underneath.",
+      "for n in range(1, 4):\n    print(n)"
+    ]
+  },
+  {
+    id: "p2-for-3",
+    module: "9 · For-loops",
+    title: "Adding things up in a loop",
+    concept:
+      "<p>A common pattern: start a total at 0, then add to it on each pass of the loop. By the end, the total holds the sum of everything.</p>" +
+      "<p>This combines the loop with the \"update a variable\" idea from earlier.</p>",
+    task: "<p>Add up all the play counts and print the total:</p><pre>350</pre>",
+    starter: "plays_list = [100, 50, 200]\ntotal = 0\n# Loop through plays_list, adding each to total, then print total\n",
+    expected: "350",
+    hints: [
+      "Inside the loop, set total to itself plus the current value.",
+      "for p in plays_list:  then indented:  total = total + p",
+      "After the loop (not indented), print(total). It should be 350."
+    ]
+  },
+  {
+    id: "p2-for-4",
+    module: "9 · For-loops",
+    title: "Looping with a decision inside",
+    concept: "<p>Put an <code>if</code> inside a loop to act on only <b>some</b> items. The if is indented inside the loop, and its own code is indented again — two levels.</p>",
+    task: "<p>Loop through the play counts and print only the ones that are 100 or more:</p><pre>100\n200</pre>",
+    starter: "plays_list = [100, 50, 200]\n# Print only the counts that are 100 or more\n",
+    expected: "100\n200",
+    hints: [
+      "for p in plays_list:  then inside it,  if p >= 100:",
+      "The print is indented twice — it sits inside the if, which sits inside the loop.",
+      "for p in plays_list:\n    if p >= 100:\n        print(p)"
+    ]
+  },
+  {
+    id: "p2-for-5",
+    module: "9 · For-loops",
+    title: "Counting matches",
+    concept: "<p>Combine the counter pattern with a filter: start a count at 0, loop through, and add 1 only when an item passes the test. This answers questions like \"how many songs are popular?\"</p>",
+    task: "<p>Count how many play counts are 100 or more, and print the count:</p><pre>2</pre>",
+    starter: "plays_list = [100, 50, 200]\ncount = 0\n# Add 1 to count for each value that is 100 or more, then print count\n",
+    expected: "2",
+    hints: [
+      "Loop through, and inside an if (value >= 100), add 1 to count.",
+      "count = count + 1  goes inside the if.",
+      "for p in plays_list:\n    if p >= 100:\n        count = count + 1\nprint(count)"
+    ]
+  },
+
+  /* ---------- Module 10 · While-loops ---------- */
+  {
+    id: "p2-while-1",
+    module: "10 · While-loops",
+    title: "Repeat while something is true",
+    concept:
+      "<p>A <code>while</code> loop repeats as long as its condition stays true. <b>Crucial:</b> something inside the loop must eventually make the condition false, or it runs forever.</p>" +
+      "<p>Here, increasing <code>n</code> each time is what eventually stops it.</p>",
+    task: "<p>Start with <code>n = 1</code>. While <code>n</code> is 3 or less, print <code>n</code> and then add 1 to it. The output:</p><pre>1\n2\n3</pre>",
+    starter: "n = 1\n# While n is 3 or less: print n, then add 1 to n\n",
+    expected: "1\n2\n3",
+    hints: [
+      "Write: while n <= 3:  ending with a colon.",
+      "Inside the loop (indented): print(n), then on the next line n = n + 1.",
+      "while n <= 3:\n    print(n)\n    n = n + 1"
+    ]
+  },
+  {
+    id: "p2-while-2",
+    module: "10 · While-loops",
+    title: "Counting down",
+    concept: "<p>A while-loop can count downward just as easily — change the variable in the other direction and flip the comparison.</p>",
+    task: "<p>Start with <code>n = 3</code>. While <code>n</code> is greater than 0, print <code>n</code> and then subtract 1. The output:</p><pre>3\n2\n1</pre>",
+    starter: "n = 3\n# While n is greater than 0: print n, then subtract 1\n",
+    expected: "3\n2\n1",
+    hints: [
+      "Condition: while n > 0:",
+      "Inside: print(n), then n = n - 1.",
+      "while n > 0:\n    print(n)\n    n = n - 1"
+    ]
+  },
+  {
+    id: "p2-while-3",
+    module: "10 · While-loops",
+    title: "Repeat until you reach a target",
+    concept: "<p>While-loops shine when you don't know the number of steps in advance — only the stopping condition. Keep going until a running total crosses a line.</p>",
+    task: "<p>You add 100 plays at a time. Starting from a total of 0, keep adding 100 while the total is still under 250, counting how many times you add. Print the count:</p><pre>3</pre>",
+    starter: "total = 0\ncount = 0\n# While total < 250: add 100 to total, add 1 to count\n",
+    expected: "3",
+    hints: [
+      "Condition: while total < 250:",
+      "Inside the loop add 100 to total and 1 to count.",
+      "while total < 250:\n    total = total + 100\n    count = count + 1\nprint(count)"
+    ]
+  },
+  {
+    id: "p2-while-4",
+    module: "10 · While-loops",
+    title: "Walking through a list by index",
+    concept: "<p>You can use a while-loop to step through a list with an index, stopping when the index reaches the list's length. (A for-loop is usually simpler — but this shows how the pieces connect.)</p>",
+    task: "<p>Use a while-loop with an index <code>i</code> to print every song in the list, one per line:</p><pre>Bohemian Rhapsody\nWe Will Rock You\nSomebody to Love</pre>",
+    starter: "songs = [\"Bohemian Rhapsody\", \"We Will Rock You\", \"Somebody to Love\"]\ni = 0\n# While i is less than the number of songs: print songs[i], then add 1 to i\n",
+    expected: "Bohemian Rhapsody\nWe Will Rock You\nSomebody to Love",
+    hints: [
+      "Condition: while i < len(songs):",
+      "Inside: print(songs[i]), then i = i + 1.",
+      "while i < len(songs):\n    print(songs[i])\n    i = i + 1"
+    ]
+  },
+
+  /* ---------- Module 11 · Dictionaries ---------- */
+  {
+    id: "p2-dict-1",
+    module: "11 · Dictionaries",
+    title: "Labeled data",
+    concept:
+      "<p>A <b>dictionary</b> stores values under labels (called <b>keys</b>) instead of positions. You write it with curly braces and <code>key: value</code> pairs.</p>" +
+      "<p>You read a value by its key: <code>song[\"title\"]</code>.</p>",
+    task: "<p>A song is stored below. Print the value under the key <code>\"title\"</code>:</p><pre>Bohemian Rhapsody</pre>",
+    starter: "song = {\"title\": \"Bohemian Rhapsody\", \"plays\": 150}\n# Print the title\n",
+    expected: "Bohemian Rhapsody",
+    hints: [
+      "Use square brackets with the key name in quotes.",
+      "song[\"title\"] gives the value stored under that key.",
+      "print(song[\"title\"])"
+    ]
+  },
+  {
+    id: "p2-dict-2",
+    module: "11 · Dictionaries",
+    title: "Reading any value by its key",
+    concept: "<p>The same square-bracket lookup works for every key. Numbers stored in a dictionary come back as real numbers, ready for maths.</p>",
+    task: "<p>From the same song, print the number of plays:</p><pre>150</pre>",
+    starter: "song = {\"title\": \"Bohemian Rhapsody\", \"plays\": 150}\n# Print the plays\n",
+    expected: "150",
+    hints: [
+      "Use the key \"plays\" in square brackets.",
+      "print(song[\"plays\"])",
+      "No quotes around the result — plays is stored as a number."
+    ]
+  },
+  {
+    id: "p2-dict-3",
+    module: "11 · Dictionaries",
+    title: "Adding a new label",
+    concept: "<p>Assigning to a key that doesn't exist yet <b>adds</b> it. <code>song[\"year\"] = 1975</code> creates a new year entry.</p>",
+    task: "<p>Add a <code>\"year\"</code> of <code>1975</code> to the song, then print it back:</p><pre>1975</pre>",
+    starter: "song = {\"title\": \"Bohemian Rhapsody\", \"plays\": 150}\n# Add a \"year\" of 1975, then print song[\"year\"]\n",
+    expected: "1975",
+    hints: [
+      "Assign to a new key: song[\"year\"] = 1975",
+      "Then read it back with print(song[\"year\"]).",
+      "song[\"year\"] = 1975\nprint(song[\"year\"])"
+    ]
+  },
+  {
+    id: "p2-dict-4",
+    module: "11 · Dictionaries",
+    title: "Looping through a dictionary",
+    concept:
+      "<p>A dictionary is perfect for pairing things — like each song title with its play count. <code>.items()</code> lets a for-loop walk through both the key and value together.</p>" +
+      "<p>This is the shape your real music data will take in the next phase.</p>",
+    task: "<p>Loop through the library and print each title and its plays, formatted like below (use an f-string with a colon and space):</p><pre>Bohemian Rhapsody: 150\nWe Will Rock You: 200</pre>",
+    starter: "library = {\"Bohemian Rhapsody\": 150, \"We Will Rock You\": 200}\n# Loop with .items() and print  title: plays  for each\n",
+    expected: "Bohemian Rhapsody: 150\nWe Will Rock You: 200",
+    hints: [
+      "Use: for title, plays in library.items():",
+      "Inside, print an f-string: f\"{title}: {plays}\"",
+      "for title, plays in library.items():\n    print(f\"{title}: {plays}\")"
+    ]
   }
 
 ];
