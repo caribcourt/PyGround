@@ -678,6 +678,118 @@ window.LESSONS = [
       "Inside, print an f-string: f\"{title}: {plays}\"",
       "for title, plays in library.items():\n    print(f\"{title}: {plays}\")"
     ]
+  },
+
+  /* ---------- Module 12 · Functions ---------- */
+  {
+    id: "p2-func-1",
+    module: "12 · Functions",
+    title: "Making your own command",
+    concept:
+      "<p>A <b>function</b> is a named block of code you can run whenever you like. You define it with <code>def</code>, a name, brackets, and a colon — then indent the code inside.</p>" +
+      "<p>Defining it doesn't run it. You run it by <b>calling</b> its name with brackets: <code>greet()</code>.</p>",
+    task: "<p>Define a function called <code>greet</code> that prints <code>Hello</code>, then call it. The output:</p><pre>Hello</pre>",
+    starter: "# Define greet() to print Hello, then call it\n",
+    expected: "Hello",
+    hints: [
+      "Define with: def greet():  and indent the print underneath.",
+      "After the function, on a line with no indent, call it: greet()",
+      "def greet():\n    print(\"Hello\")\ngreet()"
+    ]
+  },
+  {
+    id: "p2-func-2",
+    module: "12 · Functions",
+    title: "Passing information in",
+    concept:
+      "<p>A function can take <b>information</b> through its brackets, called a <b>parameter</b>. Inside the function, that parameter behaves like a variable.</p>" +
+      "<p>You supply a value when you call it: <code>announce(\"...\")</code>.</p>",
+    task: "<p>Define <code>announce(title)</code> that prints <code>Now playing: </code> followed by the title, then call it with <code>\"Bohemian Rhapsody\"</code>:</p><pre>Now playing: Bohemian Rhapsody</pre>",
+    starter: "# Define announce(title), then call it with \"Bohemian Rhapsody\"\n",
+    expected: "Now playing: Bohemian Rhapsody",
+    hints: [
+      "def announce(title):  then inside, print an f-string using {title}.",
+      "Call it with the title in quotes: announce(\"Bohemian Rhapsody\").",
+      "def announce(title):\n    print(f\"Now playing: {title}\")\nannounce(\"Bohemian Rhapsody\")"
+    ]
+  },
+  {
+    id: "p2-func-3",
+    module: "12 · Functions",
+    title: "Getting an answer back",
+    concept:
+      "<p><code>return</code> sends a value <b>back</b> from a function, so you can use the result elsewhere. This is different from <code>print()</code>, which only shows it.</p>" +
+      "<p>A function can take several parameters, separated by commas.</p>",
+    task: "<p>Define <code>total_minutes(tracks, minutes)</code> that <b>returns</b> tracks × minutes. Then print the result for 12 tracks of 3 minutes:</p><pre>36</pre>",
+    starter: "# Define total_minutes(tracks, minutes) that returns their product\n# Then print total_minutes(12, 3)\n",
+    expected: "36",
+    hints: [
+      "Inside the function use return, not print: return tracks * minutes.",
+      "Then print the call: print(total_minutes(12, 3)).",
+      "def total_minutes(tracks, minutes):\n    return tracks * minutes\nprint(total_minutes(12, 3))"
+    ]
+  },
+  {
+    id: "p2-func-4",
+    module: "12 · Functions",
+    title: "A function that works on a list",
+    concept: "<p>Functions and loops combine well: pass a whole list in, loop over it inside, and return a single answer. This packages up a reusable calculation.</p>",
+    task: "<p>Define <code>total_plays(plays_list)</code> that adds up all the numbers in the list and returns the total. Print the total for <code>[100, 50, 200]</code>:</p><pre>350</pre>",
+    starter: "# Define total_plays(plays_list): loop, sum, return the total\n# Then print total_plays([100, 50, 200])\n",
+    expected: "350",
+    hints: [
+      "Start total at 0 inside the function, loop adding each value, then return total.",
+      "Remember the return line sits at the function level, after the loop.",
+      "def total_plays(plays_list):\n    total = 0\n    for p in plays_list:\n        total = total + p\n    return total\nprint(total_plays([100, 50, 200]))"
+    ]
+  },
+
+  /* ---------- Module 13 · Mini-project ---------- */
+  {
+    id: "p2-proj-1",
+    module: "13 · Mini-project",
+    title: "Your music library, listed",
+    concept:
+      "<p>Now everything comes together. Real data is often a <b>list of dictionaries</b> — many records, each with labeled fields. Here each song is a dictionary, and the library is a list of them.</p>" +
+      "<p>Loop the list, and for each song read its fields by key.</p>",
+    task: "<p>Loop through the library and print each song as <code>title: plays</code>:</p><pre>Bohemian Rhapsody: 150\nWe Will Rock You: 200\nUnder Pressure: 80</pre>",
+    starter: "library = [\n    {\"title\": \"Bohemian Rhapsody\", \"plays\": 150},\n    {\"title\": \"We Will Rock You\", \"plays\": 200},\n    {\"title\": \"Under Pressure\", \"plays\": 80},\n]\n# Loop through library; print each as  title: plays\n",
+    expected: "Bohemian Rhapsody: 150\nWe Will Rock You: 200\nUnder Pressure: 80",
+    hints: [
+      "for song in library:  — each song is a dictionary.",
+      "Read fields with song[\"title\"] and song[\"plays\"], inside an f-string.",
+      "for song in library:\n    print(f\"{song['title']}: {song['plays']}\")"
+    ]
+  },
+  {
+    id: "p2-proj-2",
+    module: "13 · Mini-project",
+    title: "Filtering the popular ones",
+    concept: "<p>Add a decision inside the loop to act on only some records — the same filtering you'll do on real datasets, done by hand here so you understand what's happening underneath.</p>",
+    task: "<p>Loop the library and print the <b>title</b> of every song with 100 or more plays:</p><pre>Bohemian Rhapsody\nWe Will Rock You</pre>",
+    starter: "library = [\n    {\"title\": \"Bohemian Rhapsody\", \"plays\": 150},\n    {\"title\": \"We Will Rock You\", \"plays\": 200},\n    {\"title\": \"Under Pressure\", \"plays\": 80},\n]\n# Print the title of each song with plays of 100 or more\n",
+    expected: "Bohemian Rhapsody\nWe Will Rock You",
+    hints: [
+      "Inside the loop, add: if song[\"plays\"] >= 100:",
+      "Then print song[\"title\"], indented inside the if.",
+      "for song in library:\n    if song[\"plays\"] >= 100:\n        print(song[\"title\"])"
+    ]
+  },
+  {
+    id: "p2-proj-3",
+    module: "13 · Mini-project",
+    title: "Totalling it up with a function",
+    concept:
+      "<p>Finish by packaging an analysis into a reusable function: pass in the whole library, loop the records, and return the grand total of plays.</p>" +
+      "<p>This exact operation — summing a column across many records — is what pandas will do for you in one line next phase. Now you know what it's really doing.</p>",
+    task: "<p>Define <code>total_plays(library)</code> that adds up the <code>plays</code> of every song and returns it. Print the total:</p><pre>430</pre>",
+    starter: "library = [\n    {\"title\": \"Bohemian Rhapsody\", \"plays\": 150},\n    {\"title\": \"We Will Rock You\", \"plays\": 200},\n    {\"title\": \"Under Pressure\", \"plays\": 80},\n]\n# Define total_plays(library): sum every song's plays, return it\n# Then print total_plays(library)\n",
+    expected: "430",
+    hints: [
+      "Inside the function, start total at 0, loop the library, add song[\"plays\"] each time.",
+      "Return total after the loop, then print the call.",
+      "def total_plays(library):\n    total = 0\n    for song in library:\n        total = total + song[\"plays\"]\n    return total\nprint(total_plays(library))"
+    ]
   }
 
 ];
