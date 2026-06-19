@@ -311,6 +311,12 @@
       const m = text.match(/name '([^']+)' is not defined/);
       explain = "Python doesn't recognise " + (m ? "the name '" + m[1] + "'" : "a name") + ". Check the spelling, make sure you created it with = before using it, and remember text needs quotes around it.";
     }
+    else if(/KeyError/.test(text)){
+      const m = text.match(/KeyError: ['"]?([^'"\n]+)['"]?/);
+      explain = "Python couldn't find " + (m ? "the column '" + m[1].trim() + "'" : "that column") + " in the data. Column names must match exactly — check the spelling and capitals against the columns you printed earlier.";
+    }
+    else if(/FileNotFoundError|No such file/.test(text))
+      explain = "The data file couldn't be found. Check the filename in your read_csv() — it must match exactly, including the .csv ending.";
     else if(/TypeError/.test(text))
       explain = "A type mismatch — usually mixing text and numbers. Convert with str() or int() so both sides are the same type.";
     else if(/IndentationError/.test(text))
@@ -392,9 +398,10 @@
     }
     return pyodidePromise;
   }
-  const PY_SETUP =
+  const PY_STDOUT =
     "import sys, io\n" +
-    "sys.stdout = sys.stderr = io.StringIO()\n" +
+    "sys.stdout = sys.stderr = io.StringIO()\n";
+  const PY_GUARD =
     "_pg_n = 0\n" +
     "def _pg_guard(f, e, a):\n" +
     "    global _pg_n\n" +
@@ -404,10 +411,44 @@
     "    return _pg_guard\n" +
     "sys.settrace(_pg_guard)\n";
 
+  // pandas + dataset support (Phase 3)
+  let pandasLoaded = false;
+  const datasetCache = {};
+  async function ensureDataset(py, name){
+    if(!(name in datasetCache)){
+      const resp = await fetch(name);
+      if(!resp.ok){ throw new Error("dataset fetch failed"); }
+      datasetCache[name] = await resp.text();
+    }
+    py.FS.writeFile(name, datasetCache[name]);
+  }
+
   async function runCode(){
     const py = await getPython();
-    py.runPython(PY_SETUP);
+    const usesPandas = !!(current && current.needsPandas);
+
+    if(usesPandas && !pandasLoaded){
+      showOutput('<span class="dim">Loading pandas… first time only, this can take 10–20 seconds.</span>');
+      await py.loadPackage("pandas");
+      pandasLoaded = true;
+    }
+    if(current && current.dataset){
+      try{ await ensureDataset(py, current.dataset); }
+      catch(e){
+        return { ok:false, output:"",
+          error:'Could not load the data file "'+current.dataset+'". Make sure it sits in the same folder as index.html.' };
+      }
+    }
+
+    // stdout capture always; the endless-loop guard only on non-pandas lessons
+    py.runPython(PY_STDOUT);
+    if(!usesPandas){ py.runPython(PY_GUARD); }
+
     try{
+      if(current && current.setup){
+        await py.runPythonAsync(current.setup);
+        py.runPython("sys.stdout.seek(0); sys.stdout.truncate(0)"); // discard setup output; grade only the learner's
+      }
       await py.runPythonAsync(editor.getValue());
       return { ok:true, output: py.runPython("sys.stdout.getvalue()") };
     }catch(err){
