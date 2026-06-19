@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pyground — learn Python in your browser</title>
+
+<!-- Fonts (free, fetched by the browser; nothing installed) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+<!-- CodeMirror 5 (the in-page code editor) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css" />
+
+<style>
+  :root{
+    --bg:#EFEBE0;          /* warm paper workspace */
+    --paper:#FBF9F3;       /* lesson card */
+    --ink:#16181D;         /* near-black: editor + text */
+    --ink-2:#23262E;       /* panel surface on dark */
+    --muted:#6A6E78;       /* secondary text */
+    --line:#DED8C8;        /* hairline on light */
+    --honey:#FFB000;       /* signature accent (Python amber) */
+    --honey-press:#E59E00;
+    --pine:#1F9B7A;        /* run / success green */
+    --code-fg:#EAE6DA;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- top bar ---------- */
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 22px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .glyph{
+    font-family:"JetBrains Mono", monospace; font-weight:700;
+    background:var(--ink); color:var(--honey);
+    padding:4px 9px; border-radius:9px; font-size:15px; letter-spacing:-1px;
+  }
+  .brand b{font-weight:700; font-size:18px; letter-spacing:-.3px;}
+  .brand .tag{
+    font-size:11px; font-weight:600; color:var(--muted);
+    border:1px solid var(--line); padding:2px 8px; border-radius:999px; margin-left:2px;
+  }
+  .progress{font-size:13px; color:var(--muted); font-weight:500;}
+
+  /* ---------- layout ---------- */
+  main{
+    display:grid;
+    grid-template-columns: minmax(280px, 0.9fr) 1.1fr;
+    gap:20px;
+    padding:22px;
+    max-width:1180px; margin:0 auto;
+    align-items:start;
+  }
+
+  /* ---------- lesson card ---------- */
+  .lesson{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:26px 26px 28px;
+  }
+  .eyebrow{
+    font-family:"JetBrains Mono", monospace;
+    font-size:12px; font-weight:500; color:var(--muted);
+    margin-bottom:14px;
+  }
+  .eyebrow .prompt{color:var(--honey-press);}
+  .lesson h1{
+    font-size:27px; font-weight:700; letter-spacing:-.6px;
+    margin:0 0 14px;
+  }
+  .lesson p{font-size:15px; line-height:1.6; color:#33363D; margin:0 0 14px;}
+  .lesson code.inline{
+    font-family:"JetBrains Mono", monospace; font-size:13px;
+    background:#ECE6D6; padding:1px 6px; border-radius:6px;
+  }
+  .turn{
+    margin-top:20px; padding:16px 18px;
+    background:#FFF; border:1px solid var(--line); border-left:3px solid var(--honey);
+    border-radius:12px;
+  }
+  .turn .label{
+    font-family:"JetBrains Mono", monospace; font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:1px; color:var(--honey-press);
+    display:block; margin-bottom:6px;
+  }
+  .turn p{margin:0; font-size:14px; color:#33363D;}
+
+  /* ---------- workspace (editor + output) ---------- */
+  .workspace{display:flex; flex-direction:column; gap:16px;}
+
+  .editor-shell, .output-shell{
+    background:var(--ink); border-radius:16px; overflow:hidden;
+    box-shadow:0 12px 30px -18px rgba(0,0,0,.5);
+  }
+  .bar{
+    display:flex; align-items:center; gap:10px;
+    height:42px; padding:0 14px;
+    background:var(--ink-2); border-bottom:1px solid #000;
+  }
+  .filename{
+    font-family:"JetBrains Mono", monospace; font-size:12px; color:#A7ABB5;
+    display:flex; align-items:center; gap:8px;
+  }
+  .filename .dot{width:8px; height:8px; border-radius:50%; background:var(--pine);}
+  .spacer{flex:1;}
+
+  .run{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:"Space Grotesk", sans-serif; font-weight:600; font-size:13px;
+    color:var(--ink); background:var(--honey);
+    border:0; border-radius:9px; padding:7px 16px; cursor:pointer;
+    transition:transform .08s ease, background .15s ease;
+  }
+  .run:hover{background:var(--honey-press);}
+  .run:active{transform:scale(.96);}
+  .run:disabled{opacity:.55; cursor:default;}
+  .run svg{width:13px; height:13px;}
+  .run:focus-visible{outline:3px solid #fff; outline-offset:2px;}
+
+  /* CodeMirror sizing */
+  .CodeMirror{
+    height:300px;
+    font-family:"JetBrains Mono", monospace !important;
+    font-size:13.5px; line-height:1.6;
+    background:var(--ink) !important;
+  }
+  .CodeMirror-gutters{background:var(--ink) !important; border:0 !important;}
+
+  /* output terminal */
+  .out-head{
+    display:flex; align-items:center; gap:8px;
+    font-family:"JetBrains Mono", monospace; font-size:12px; color:#A7ABB5;
+  }
+  .out-head .prompt{color:var(--honey);}
+  pre.output{
+    margin:0; padding:16px 16px 20px;
+    font-family:"JetBrains Mono", monospace; font-size:13px; line-height:1.65;
+    color:var(--code-fg); white-space:pre-wrap; word-break:break-word;
+    min-height:96px; max-height:240px; overflow:auto;
+  }
+  pre.output .err{color:#FF8B6B;}
+  pre.output .dim{color:#7E828C;}
+  .fade{animation:fade .18s ease;}
+  @keyframes fade{from{opacity:.3;} to{opacity:1;}}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:880px){
+    main{grid-template-columns:1fr; padding:16px; gap:16px;}
+    .CodeMirror{height:240px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="glyph">&gt;&gt;&gt;</span>
+    <b>Pyground</b>
+    <span class="tag">working name</span>
+  </div>
+  <div class="progress">Lesson 1 of 1</div>
+</header>
+
+<main>
+  <!-- LEFT: lesson -->
+  <section class="lesson">
+    <div class="eyebrow"><span class="prompt">&gt;&gt;&gt;</span> module · the basics</div>
+    <h1>Say hello to Python</h1>
+    <p>
+      The <code class="inline">print()</code> function tells Python to show something on the screen.
+      Whatever you put between the quotes gets printed back to you.
+    </p>
+    <p>
+      Try running the code on the right. You should see the words appear in the
+      output panel below the editor.
+    </p>
+
+    <div class="turn">
+      <span class="label">Your turn</span>
+      <p>Change the message so Python prints <strong>your own name</strong>, then press Run.</p>
+    </div>
+  </section>
+
+  <!-- RIGHT: editor + output -->
+  <section class="workspace">
+    <div class="editor-shell">
+      <div class="bar">
+        <span class="filename"><span class="dot"></span> main.py</span>
+        <span class="spacer"></span>
+        <button class="run" id="runBtn">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          <span id="runLabel">Run</span>
+        </button>
+      </div>
+      <textarea id="code">print("Hello, world!")</textarea>
+    </div>
+
+    <div class="output-shell">
+      <div class="bar">
+        <span class="out-head"><span class="prompt">&gt;&gt;&gt;</span> output</span>
+      </div>
+      <pre class="output" id="output"><span class="dim">Press Run to execute your code.</span></pre>
+    </div>
+  </section>
+</main>
+
+<!-- CodeMirror scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<!-- Pyodide (runs Python in the browser) -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
+
+<script>
+  // ---- set up the editor ----
+  const editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    mode: "python",
+    theme: "material-darker",
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+  });
+
+  const out = document.getElementById("output");
+  const runBtn = document.getElementById("runBtn");
+  const runLabel = document.getElementById("runLabel");
+
+  function show(html, isError){
+    out.className = "output fade";
+    out.innerHTML = html;
+    // restart the fade animation
+    void out.offsetWidth;
+  }
+
+  // ---- load Python once, on first Run ----
+  let pyodidePromise = null;
+  async function getPython(){
+    if(!pyodidePromise){
+      show('<span class="dim">Starting Python… first time takes a few seconds.</span>');
+      pyodidePromise = loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/" });
+    }
+    return pyodidePromise;
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
+  }
+
+  async function run(){
+    runBtn.disabled = true;
+    runLabel.textContent = "Running…";
+    try{
+      const py = await getPython();
+
+      // redirect Python's output into a buffer we can read
+      py.runPython("import sys, io\nsys.stdout = sys.stderr = io.StringIO()");
+
+      const code = editor.getValue();
+      try{
+        await py.runPythonAsync(code);
+        const text = py.runPython("sys.stdout.getvalue()");
+        if(text && text.trim().length){
+          show(escapeHtml(text));
+        }else{
+          show('<span class="dim">Code ran — no output to show.</span>');
+        }
+      }catch(err){
+        const printed = py.runPython("sys.stdout.getvalue()") || "";
+        const msg = escapeHtml(printed) + '<span class="err">' + escapeHtml(String(err.message || err)) + '</span>';
+        show(msg, true);
+      }
+    }catch(loadErr){
+      show('<span class="err">Could not start Python. Check your internet connection and refresh.</span>', true);
+    }finally{
+      runBtn.disabled = false;
+      runLabel.textContent = "Run";
+    }
+  }
+
+  runBtn.addEventListener("click", run);
+  // Ctrl/Cmd + Enter to run
+  editor.setOption("extraKeys", { "Ctrl-Enter": run, "Cmd-Enter": run });
+</script>
+</body>
+</html>
