@@ -33,7 +33,15 @@
   .brand b{font-weight:700; font-size:18px; letter-spacing:-.3px;}
   .brand .tag{font-size:11px; font-weight:600; color:var(--muted);
     border:1px solid var(--line); padding:2px 8px; border-radius:999px; margin-left:2px;}
-  .progress{font-size:13px; color:var(--muted); font-weight:500;}
+  .progress{display:flex; align-items:center; gap:12px; font-size:13px; color:var(--muted); font-weight:500;}
+  .done-pill{display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:700;
+    color:#136A52; background:var(--pine-soft); border:1px solid #BFE3D6;
+    padding:3px 10px; border-radius:999px;}
+  .done-pill svg{width:12px; height:12px;}
+  .reset{font-family:"Space Grotesk",sans-serif; font-size:12px; font-weight:500;
+    color:var(--muted); background:transparent; border:1px solid var(--line);
+    border-radius:8px; padding:4px 10px; cursor:pointer;}
+  .reset:hover{color:var(--ink); border-color:var(--muted);}
 
   main{display:grid; grid-template-columns:minmax(280px,0.9fr) 1.1fr; gap:20px;
     padding:22px; max-width:1180px; margin:0 auto; align-items:start;}
@@ -64,6 +72,9 @@
   .filename{font-family:"JetBrains Mono", monospace; font-size:12px; color:#A7ABB5;
     display:flex; align-items:center; gap:8px;}
   .filename .dot{width:8px; height:8px; border-radius:50%; background:var(--pine);}
+  .saved{font-family:"JetBrains Mono",monospace; font-size:11px; color:#6FCF97;
+    opacity:0; transition:opacity .25s ease;}
+  .saved.show{opacity:1;}
   .spacer{flex:1;}
   .btns{display:flex; gap:8px;}
 
@@ -114,7 +125,6 @@
   .result.error .badge{background:#FF8B6B; color:#3a1409;}
   .result.error .head{color:#a23d1f;}
 
-  /* hints */
   .hints{margin-top:16px; border-top:1px solid rgba(0,0,0,.09); padding-top:14px;}
   .hints .stuck{font-family:"JetBrains Mono",monospace; font-size:11px; text-transform:uppercase;
     letter-spacing:1px; color:var(--muted); display:block; margin-bottom:10px;}
@@ -138,6 +148,7 @@
     main{grid-template-columns:1fr; padding:16px; gap:16px;}
     .CodeMirror{height:240px;}
     .result .cmp{grid-template-columns:1fr;}
+    header{flex-wrap:wrap; gap:10px;}
   }
   @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important;}}
 </style>
@@ -150,7 +161,13 @@
     <b>Pyground</b>
     <span class="tag">working name</span>
   </div>
-  <div class="progress">Lesson 1 of 1</div>
+  <div class="progress">
+    <span id="progressText">Lesson 1 of 1</span>
+    <span class="done-pill" id="donePill" hidden>
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.4z"/></svg>done
+    </span>
+    <button class="reset" id="resetBtn">Reset</button>
+  </div>
 </header>
 
 <main>
@@ -176,6 +193,7 @@
     <div class="editor-shell">
       <div class="bar">
         <span class="filename"><span class="dot"></span> main.py</span>
+        <span class="saved" id="savedTag">saved</span>
         <span class="spacer"></span>
         <div class="btns">
           <button class="btn btn-run" id="runBtn">
@@ -208,8 +226,10 @@ print(1)</textarea>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
 
 <script>
-  // ----- challenge data (this whole block is what Stage 5 will load from lesson files) -----
+  // ----- challenge data (Stage 5 will load this from lesson files) -----
   const CHALLENGE = {
+    id: "basics-printing-01",
+    starter: "# Print 1, 2, and 3, each on its own line\nprint(1)",
     expectedOutput: "1\n2\n3",
     hints: [
       "Each print() call automatically moves to a new line. So how many separate print() calls do you need to make three lines?",
@@ -217,6 +237,17 @@ print(1)</textarea>
       "Write three statements, each on its own line: print(1), then print(2), then print(3). Make sure the numbers have no quotes around them, or they will print as text instead of numbers."
     ]
   };
+
+  // ----- progress storage (browser localStorage) -----
+  const STORE_KEY = "pyground:v1";
+  function loadStore(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ return {}; } }
+  function saveStore(d){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }catch(e){} }
+  function getLesson(id){ const s = loadStore(); return (s.lessons && s.lessons[id]) || {}; }
+  function setLesson(id, patch){
+    const s = loadStore(); s.lessons = s.lessons || {};
+    s.lessons[id] = Object.assign({}, s.lessons[id], patch);
+    saveStore(s);
+  }
 
   let hintsRevealed = 0;
 
@@ -230,6 +261,35 @@ print(1)</textarea>
   const checkBtn = document.getElementById("checkBtn");
   const runLabel = document.getElementById("runLabel");
   const checkLabel = document.getElementById("checkLabel");
+  const donePill = document.getElementById("donePill");
+  const savedTag = document.getElementById("savedTag");
+  const resetBtn = document.getElementById("resetBtn");
+
+  // ----- restore saved progress on load -----
+  (function restore(){
+    const saved = getLesson(CHALLENGE.id);
+    if(typeof saved.code === "string" && saved.code.length){ editor.setValue(saved.code); }
+    if(saved.completed){ markCompleted(); }
+  })();
+
+  function markCompleted(){ donePill.hidden = false; }
+
+  let savedTimer;
+  function flashSaved(){
+    savedTag.classList.add("show");
+    clearTimeout(savedTimer);
+    savedTimer = setTimeout(()=> savedTag.classList.remove("show"), 1100);
+  }
+
+  // ----- save code as the learner types (debounced) -----
+  let codeTimer;
+  editor.on("change", function(){
+    clearTimeout(codeTimer);
+    codeTimer = setTimeout(function(){
+      setLesson(CHALLENGE.id, { code: editor.getValue() });
+      flashSaved();
+    }, 400);
+  });
 
   function escapeHtml(s){
     return String(s).replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
@@ -296,7 +356,9 @@ print(1)</textarea>
 
       if(normalize(r.output) === normalize(CHALLENGE.expectedOutput)){
         hintsRevealed = 0;
-        renderResult("correct", "Correct", "Your output matches exactly. Nicely done.");
+        setLesson(CHALLENGE.id, { completed:true, code: editor.getValue() });
+        markCompleted(); flashSaved();
+        renderResult("correct", "Correct", "Your output matches exactly. Progress saved — you can close the tab and come back to it.");
       }else{
         renderResult("notyet", "Not quite yet",
           "Your output doesn't match the target. Compare the two below, then reveal a hint if you need a nudge.",
@@ -350,6 +412,18 @@ print(1)</textarea>
       });
     }
   }
+
+  // ----- reset progress -----
+  resetBtn.addEventListener("click", function(){
+    if(confirm("Reset all saved progress and code? This cannot be undone.")){
+      try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+      editor.setValue(CHALLENGE.starter);
+      donePill.hidden = true;
+      resultEl.hidden = true;
+      hintsRevealed = 0;
+      showOutput('<span class="dim">Progress reset. Press Run to test your code, or Check answer to grade it.</span>');
+    }
+  });
 
   runBtn.addEventListener("click", handleRun);
   checkBtn.addEventListener("click", handleCheck);
