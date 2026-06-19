@@ -5,168 +5,125 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Pyground — learn Python in your browser</title>
 
-<!-- Fonts (free, fetched by the browser; nothing installed) -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 
-<!-- CodeMirror 5 (the in-page code editor) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css" />
 
 <style>
   :root{
-    --bg:#EFEBE0;          /* warm paper workspace */
-    --paper:#FBF9F3;       /* lesson card */
-    --ink:#16181D;         /* near-black: editor + text */
-    --ink-2:#23262E;       /* panel surface on dark */
-    --muted:#6A6E78;       /* secondary text */
-    --line:#DED8C8;        /* hairline on light */
-    --honey:#FFB000;       /* signature accent (Python amber) */
-    --honey-press:#E59E00;
-    --pine:#1F9B7A;        /* run / success green */
-    --code-fg:#EAE6DA;
+    --bg:#EFEBE0; --paper:#FBF9F3; --ink:#16181D; --ink-2:#23262E;
+    --muted:#6A6E78; --line:#DED8C8; --honey:#FFB000; --honey-press:#E59E00;
+    --pine:#1F9B7A; --pine-soft:#E7F4EF; --code-fg:#EAE6DA;
   }
-
   *{box-sizing:border-box;}
   html,body{height:100%;}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
+  body{margin:0; background:var(--bg); color:var(--ink);
     font-family:"Space Grotesk", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
+    -webkit-font-smoothing:antialiased;}
 
-  /* ---------- top bar ---------- */
-  header{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px 22px;
-    border-bottom:1px solid var(--line);
-  }
+  header{display:flex; align-items:center; justify-content:space-between;
+    padding:14px 22px; border-bottom:1px solid var(--line);}
   .brand{display:flex; align-items:center; gap:10px;}
-  .glyph{
-    font-family:"JetBrains Mono", monospace; font-weight:700;
-    background:var(--ink); color:var(--honey);
-    padding:4px 9px; border-radius:9px; font-size:15px; letter-spacing:-1px;
-  }
+  .glyph{font-family:"JetBrains Mono", monospace; font-weight:700;
+    background:var(--ink); color:var(--honey); padding:4px 9px; border-radius:9px;
+    font-size:15px; letter-spacing:-1px;}
   .brand b{font-weight:700; font-size:18px; letter-spacing:-.3px;}
-  .brand .tag{
-    font-size:11px; font-weight:600; color:var(--muted);
-    border:1px solid var(--line); padding:2px 8px; border-radius:999px; margin-left:2px;
-  }
+  .brand .tag{font-size:11px; font-weight:600; color:var(--muted);
+    border:1px solid var(--line); padding:2px 8px; border-radius:999px; margin-left:2px;}
   .progress{font-size:13px; color:var(--muted); font-weight:500;}
 
-  /* ---------- layout ---------- */
-  main{
-    display:grid;
-    grid-template-columns: minmax(280px, 0.9fr) 1.1fr;
-    gap:20px;
-    padding:22px;
-    max-width:1180px; margin:0 auto;
-    align-items:start;
-  }
+  main{display:grid; grid-template-columns:minmax(280px,0.9fr) 1.1fr; gap:20px;
+    padding:22px; max-width:1180px; margin:0 auto; align-items:start;}
 
-  /* ---------- lesson card ---------- */
-  .lesson{
-    background:var(--paper);
-    border:1px solid var(--line);
-    border-radius:18px;
-    padding:26px 26px 28px;
-  }
-  .eyebrow{
-    font-family:"JetBrains Mono", monospace;
-    font-size:12px; font-weight:500; color:var(--muted);
-    margin-bottom:14px;
-  }
+  .lesson{background:var(--paper); border:1px solid var(--line); border-radius:18px;
+    padding:26px 26px 28px;}
+  .eyebrow{font-family:"JetBrains Mono", monospace; font-size:12px; font-weight:500;
+    color:var(--muted); margin-bottom:14px;}
   .eyebrow .prompt{color:var(--honey-press);}
-  .lesson h1{
-    font-size:27px; font-weight:700; letter-spacing:-.6px;
-    margin:0 0 14px;
-  }
+  .lesson h1{font-size:27px; font-weight:700; letter-spacing:-.6px; margin:0 0 14px;}
   .lesson p{font-size:15px; line-height:1.6; color:#33363D; margin:0 0 14px;}
-  .lesson code.inline{
-    font-family:"JetBrains Mono", monospace; font-size:13px;
-    background:#ECE6D6; padding:1px 6px; border-radius:6px;
-  }
-  .turn{
-    margin-top:20px; padding:16px 18px;
-    background:#FFF; border:1px solid var(--line); border-left:3px solid var(--honey);
-    border-radius:12px;
-  }
-  .turn .label{
-    font-family:"JetBrains Mono", monospace; font-size:11px; font-weight:700;
+  .lesson code.inline{font-family:"JetBrains Mono", monospace; font-size:13px;
+    background:#ECE6D6; padding:1px 6px; border-radius:6px;}
+  .turn{margin-top:20px; padding:16px 18px; background:#FFF; border:1px solid var(--line);
+    border-left:3px solid var(--honey); border-radius:12px;}
+  .turn .label{font-family:"JetBrains Mono", monospace; font-size:11px; font-weight:700;
     text-transform:uppercase; letter-spacing:1px; color:var(--honey-press);
-    display:block; margin-bottom:6px;
-  }
-  .turn p{margin:0; font-size:14px; color:#33363D;}
+    display:block; margin-bottom:6px;}
+  .turn p{margin:0 0 10px; font-size:14px; color:#33363D;}
+  .turn pre{margin:8px 0 0; font-family:"JetBrains Mono", monospace; font-size:13px;
+    background:#16181D; color:#EAE6DA; padding:10px 12px; border-radius:8px;}
 
-  /* ---------- workspace (editor + output) ---------- */
   .workspace{display:flex; flex-direction:column; gap:16px;}
-
-  .editor-shell, .output-shell{
-    background:var(--ink); border-radius:16px; overflow:hidden;
-    box-shadow:0 12px 30px -18px rgba(0,0,0,.5);
-  }
-  .bar{
-    display:flex; align-items:center; gap:10px;
-    height:42px; padding:0 14px;
-    background:var(--ink-2); border-bottom:1px solid #000;
-  }
-  .filename{
-    font-family:"JetBrains Mono", monospace; font-size:12px; color:#A7ABB5;
-    display:flex; align-items:center; gap:8px;
-  }
+  .editor-shell,.output-shell{background:var(--ink); border-radius:16px; overflow:hidden;
+    box-shadow:0 12px 30px -18px rgba(0,0,0,.5);}
+  .bar{display:flex; align-items:center; gap:10px; height:46px; padding:0 14px;
+    background:var(--ink-2); border-bottom:1px solid #000;}
+  .filename{font-family:"JetBrains Mono", monospace; font-size:12px; color:#A7ABB5;
+    display:flex; align-items:center; gap:8px;}
   .filename .dot{width:8px; height:8px; border-radius:50%; background:var(--pine);}
   .spacer{flex:1;}
+  .btns{display:flex; gap:8px;}
 
-  .run{
-    display:inline-flex; align-items:center; gap:7px;
-    font-family:"Space Grotesk", sans-serif; font-weight:600; font-size:13px;
-    color:var(--ink); background:var(--honey);
-    border:0; border-radius:9px; padding:7px 16px; cursor:pointer;
-    transition:transform .08s ease, background .15s ease;
-  }
-  .run:hover{background:var(--honey-press);}
-  .run:active{transform:scale(.96);}
-  .run:disabled{opacity:.55; cursor:default;}
-  .run svg{width:13px; height:13px;}
-  .run:focus-visible{outline:3px solid #fff; outline-offset:2px;}
+  .btn{display:inline-flex; align-items:center; gap:7px; font-family:"Space Grotesk",sans-serif;
+    font-weight:600; font-size:13px; border-radius:9px; padding:7px 15px; cursor:pointer;
+    transition:transform .08s ease, background .15s ease, border-color .15s ease;}
+  .btn:active{transform:scale(.96);}
+  .btn:disabled{opacity:.55; cursor:default;}
+  .btn:focus-visible{outline:3px solid #fff; outline-offset:2px;}
+  .btn svg{width:13px; height:13px;}
+  .btn-run{background:transparent; color:#CFD2D9; border:1px solid #3A3E48;}
+  .btn-run:hover{border-color:#5A5F6B; color:#fff;}
+  .btn-check{background:var(--honey); color:var(--ink); border:1px solid var(--honey);}
+  .btn-check:hover{background:var(--honey-press); border-color:var(--honey-press);}
 
-  /* CodeMirror sizing */
-  .CodeMirror{
-    height:300px;
-    font-family:"JetBrains Mono", monospace !important;
-    font-size:13.5px; line-height:1.6;
-    background:var(--ink) !important;
-  }
+  .CodeMirror{height:300px; font-family:"JetBrains Mono",monospace !important;
+    font-size:13.5px; line-height:1.6; background:var(--ink) !important;}
   .CodeMirror-gutters{background:var(--ink) !important; border:0 !important;}
 
-  /* output terminal */
-  .out-head{
-    display:flex; align-items:center; gap:8px;
-    font-family:"JetBrains Mono", monospace; font-size:12px; color:#A7ABB5;
-  }
+  .out-head{display:flex; align-items:center; gap:8px;
+    font-family:"JetBrains Mono",monospace; font-size:12px; color:#A7ABB5;}
   .out-head .prompt{color:var(--honey);}
-  pre.output{
-    margin:0; padding:16px 16px 20px;
-    font-family:"JetBrains Mono", monospace; font-size:13px; line-height:1.65;
-    color:var(--code-fg); white-space:pre-wrap; word-break:break-word;
-    min-height:96px; max-height:240px; overflow:auto;
-  }
+  pre.output{margin:0; padding:16px 16px 20px; font-family:"JetBrains Mono",monospace;
+    font-size:13px; line-height:1.65; color:var(--code-fg); white-space:pre-wrap;
+    word-break:break-word; min-height:72px; max-height:240px; overflow:auto;}
   pre.output .err{color:#FF8B6B;}
   pre.output .dim{color:#7E828C;}
+
+  /* result card */
+  .result{border-radius:16px; padding:18px 20px; border:1px solid var(--line);
+    background:var(--paper);}
+  .result[hidden]{display:none;}
+  .result .head{display:flex; align-items:center; gap:9px; font-weight:700;
+    font-size:16px; letter-spacing:-.3px; margin-bottom:6px;}
+  .result .badge{font-family:"JetBrains Mono",monospace; font-size:12px; font-weight:700;
+    padding:3px 9px; border-radius:7px;}
+  .result p{margin:0 0 8px; font-size:14px; color:#33363D; line-height:1.55;}
+  .result .cmp{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;}
+  .result .cmp .box{background:var(--ink); border-radius:10px; padding:10px 12px;}
+  .result .cmp .box .lbl{font-family:"JetBrains Mono",monospace; font-size:10px;
+    text-transform:uppercase; letter-spacing:1px; color:#7E828C; display:block; margin-bottom:5px;}
+  .result .cmp pre{margin:0; font-family:"JetBrains Mono",monospace; font-size:12.5px;
+    color:#EAE6DA; white-space:pre-wrap; word-break:break-word;}
+  .result.correct{background:var(--pine-soft); border-color:#BFE3D6;}
+  .result.correct .badge{background:var(--pine); color:#fff;}
+  .result.correct .head{color:#136A52;}
+  .result.notyet .badge{background:var(--honey); color:var(--ink);}
+  .result.notyet .head{color:#8A6200;}
+  .result.error .badge{background:#FF8B6B; color:#3a1409;}
+  .result.error .head{color:#a23d1f;}
+
   .fade{animation:fade .18s ease;}
   @keyframes fade{from{opacity:.3;} to{opacity:1;}}
 
-  /* ---------- responsive ---------- */
   @media (max-width:880px){
     main{grid-template-columns:1fr; padding:16px; gap:16px;}
     .CodeMirror{height:240px;}
+    .result .cmp{grid-template-columns:1fr;}
   }
-  @media (prefers-reduced-motion: reduce){
-    *{animation:none !important; transition:none !important;}
-  }
+  @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important;}}
 </style>
 </head>
 <body>
@@ -181,123 +138,178 @@
 </header>
 
 <main>
-  <!-- LEFT: lesson -->
   <section class="lesson">
     <div class="eyebrow"><span class="prompt">&gt;&gt;&gt;</span> module · the basics</div>
-    <h1>Say hello to Python</h1>
+    <h1>Printing output</h1>
     <p>
-      The <code class="inline">print()</code> function tells Python to show something on the screen.
-      Whatever you put between the quotes gets printed back to you.
-    </p>
-    <p>
-      Try running the code on the right. You should see the words appear in the
-      output panel below the editor.
+      The <code class="inline">print()</code> function shows something on the screen.
+      Each <code class="inline">print()</code> starts a new line, so calling it three
+      times prints three separate lines.
     </p>
 
     <div class="turn">
       <span class="label">Your turn</span>
-      <p>Change the message so Python prints <strong>your own name</strong>, then press Run.</p>
+      <p>Make Python print the numbers <strong>1</strong>, <strong>2</strong>, and <strong>3</strong> — each on its own line. The result should look exactly like this:</p>
+      <pre>1
+2
+3</pre>
     </div>
   </section>
 
-  <!-- RIGHT: editor + output -->
   <section class="workspace">
     <div class="editor-shell">
       <div class="bar">
         <span class="filename"><span class="dot"></span> main.py</span>
         <span class="spacer"></span>
-        <button class="run" id="runBtn">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-          <span id="runLabel">Run</span>
-        </button>
+        <div class="btns">
+          <button class="btn btn-run" id="runBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <span id="runLabel">Run</span>
+          </button>
+          <button class="btn btn-check" id="checkBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.4z"/></svg>
+            <span id="checkLabel">Check answer</span>
+          </button>
+        </div>
       </div>
-      <textarea id="code">print("Hello, world!")</textarea>
+      <textarea id="code"># Print 1, 2, and 3, each on its own line
+print(1)</textarea>
     </div>
 
     <div class="output-shell">
       <div class="bar">
         <span class="out-head"><span class="prompt">&gt;&gt;&gt;</span> output</span>
       </div>
-      <pre class="output" id="output"><span class="dim">Press Run to execute your code.</span></pre>
+      <pre class="output" id="output"><span class="dim">Press Run to test your code, or Check answer to grade it.</span></pre>
     </div>
+
+    <div class="result" id="result" hidden></div>
   </section>
 </main>
 
-<!-- CodeMirror scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
-<!-- Pyodide (runs Python in the browser) -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
 
 <script>
-  // ---- set up the editor ----
+  // ----- challenge definition (this is the data that will later live in lesson files) -----
+  const CHALLENGE = {
+    expectedOutput: "1\n2\n3"
+  };
+
   const editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-    mode: "python",
-    theme: "material-darker",
-    lineNumbers: true,
-    indentUnit: 4,
-    tabSize: 4,
+    mode:"python", theme:"material-darker", lineNumbers:true, indentUnit:4, tabSize:4
   });
 
   const out = document.getElementById("output");
+  const resultEl = document.getElementById("result");
   const runBtn = document.getElementById("runBtn");
+  const checkBtn = document.getElementById("checkBtn");
   const runLabel = document.getElementById("runLabel");
+  const checkLabel = document.getElementById("checkLabel");
 
-  function show(html, isError){
-    out.className = "output fade";
-    out.innerHTML = html;
-    // restart the fade animation
-    void out.offsetWidth;
+  function escapeHtml(s){
+    return String(s).replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
+  }
+  function showOutput(html){ out.className = "output fade"; out.innerHTML = html; void out.offsetWidth; }
+  function setBusy(b, who){
+    runBtn.disabled = b; checkBtn.disabled = b;
+    runLabel.textContent = (b && who==="run") ? "Running…" : "Run";
+    checkLabel.textContent = (b && who==="check") ? "Checking…" : "Check answer";
   }
 
-  // ---- load Python once, on first Run ----
+  // normalize output so trailing spaces / blank lines don't cause false fails
+  function normalize(s){
+    return String(s).replace(/\r\n/g,"\n").split("\n")
+      .map(l => l.replace(/\s+$/,"")).join("\n")
+      .replace(/\n+$/,"").replace(/^\n+/,"");
+  }
+
+  // ----- Python engine (loads once, on first use) -----
   let pyodidePromise = null;
   async function getPython(){
     if(!pyodidePromise){
-      show('<span class="dim">Starting Python… first time takes a few seconds.</span>');
-      pyodidePromise = loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/" });
+      showOutput('<span class="dim">Starting Python… first time takes a few seconds.</span>');
+      pyodidePromise = loadPyodide({ indexURL:"https://cdn.jsdelivr.net/pyodide/v0.26.1/full/" });
     }
     return pyodidePromise;
   }
 
-  function escapeHtml(s){
-    return s.replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
-  }
-
-  async function run(){
-    runBtn.disabled = true;
-    runLabel.textContent = "Running…";
+  async function runCode(){
+    const py = await getPython();
+    py.runPython("import sys, io\nsys.stdout = sys.stderr = io.StringIO()");
     try{
-      const py = await getPython();
-
-      // redirect Python's output into a buffer we can read
-      py.runPython("import sys, io\nsys.stdout = sys.stderr = io.StringIO()");
-
-      const code = editor.getValue();
-      try{
-        await py.runPythonAsync(code);
-        const text = py.runPython("sys.stdout.getvalue()");
-        if(text && text.trim().length){
-          show(escapeHtml(text));
-        }else{
-          show('<span class="dim">Code ran — no output to show.</span>');
-        }
-      }catch(err){
-        const printed = py.runPython("sys.stdout.getvalue()") || "";
-        const msg = escapeHtml(printed) + '<span class="err">' + escapeHtml(String(err.message || err)) + '</span>';
-        show(msg, true);
-      }
-    }catch(loadErr){
-      show('<span class="err">Could not start Python. Check your internet connection and refresh.</span>', true);
-    }finally{
-      runBtn.disabled = false;
-      runLabel.textContent = "Run";
+      await py.runPythonAsync(editor.getValue());
+      return { ok:true, output: py.runPython("sys.stdout.getvalue()") };
+    }catch(err){
+      return { ok:false, output: py.runPython("sys.stdout.getvalue()") || "", error:String(err.message||err) };
     }
   }
 
-  runBtn.addEventListener("click", run);
-  // Ctrl/Cmd + Enter to run
-  editor.setOption("extraKeys", { "Ctrl-Enter": run, "Cmd-Enter": run });
+  // ----- Run: just show output -----
+  async function handleRun(){
+    setBusy(true,"run"); resultEl.hidden = true;
+    try{
+      const r = await runCode();
+      if(r.ok){
+        showOutput(r.output && r.output.trim().length ? escapeHtml(r.output) : '<span class="dim">Code ran — no output to show.</span>');
+      }else{
+        showOutput(escapeHtml(r.output) + '<span class="err">' + escapeHtml(r.error) + '</span>');
+      }
+    }catch(e){
+      showOutput('<span class="err">Could not start Python. Check your connection and refresh.</span>');
+    }finally{ setBusy(false); }
+  }
+
+  // ----- Check: run, then grade output against the expected result -----
+  async function handleCheck(){
+    setBusy(true,"check");
+    try{
+      const r = await runCode();
+
+      // 1) code crashed — fix the error before grading
+      if(!r.ok){
+        showOutput(escapeHtml(r.output) + '<span class="err">' + escapeHtml(r.error) + '</span>');
+        renderResult("error", "Fix the error first",
+          "Your code hit an error, so it can't be checked yet. The red message in the output panel says what went wrong.");
+        return;
+      }
+
+      showOutput(r.output && r.output.trim().length ? escapeHtml(r.output) : '<span class="dim">Code ran — no output to show.</span>');
+
+      // 2) compare to the expected output
+      if(normalize(r.output) === normalize(CHALLENGE.expectedOutput)){
+        renderResult("correct", "Correct", "Your output matches exactly. Nicely done.");
+      }else{
+        renderResult("notyet", "Not quite yet",
+          "Your output doesn't match the target. Compare the two below — look for missing lines, extra text, or things on the same line that should be split.",
+          { expected: CHALLENGE.expectedOutput, got: r.output });
+      }
+    }catch(e){
+      renderResult("error","Couldn't run","Python didn't start. Check your connection and refresh the page.");
+    }finally{ setBusy(false); }
+  }
+
+  function renderResult(kind, heading, message, cmp){
+    let html = '<div class="head"><span class="badge">'
+      + (kind==="correct" ? "PASS" : kind==="notyet" ? "TRY AGAIN" : "ERROR")
+      + '</span>' + escapeHtml(heading) + '</div><p>' + escapeHtml(message) + '</p>';
+    if(cmp){
+      html += '<div class="cmp">'
+        + '<div class="box"><span class="lbl">Target output</span><pre>' + escapeHtml(normalize(cmp.expected)) + '</pre></div>'
+        + '<div class="box"><span class="lbl">Your output</span><pre>' + (cmp.got && cmp.got.trim().length ? escapeHtml(normalize(cmp.got)) : '<span class="dim">(nothing printed)</span>') + '</pre></div>'
+        + '</div>';
+    }
+    resultEl.className = "result fade " + kind;
+    resultEl.innerHTML = html;
+    resultEl.hidden = false;
+    void resultEl.offsetWidth;
+  }
+
+  runBtn.addEventListener("click", handleRun);
+  checkBtn.addEventListener("click", handleCheck);
+  editor.setOption("extraKeys", { "Ctrl-Enter": handleRun, "Cmd-Enter": handleRun,
+    "Shift-Enter": handleCheck });
 </script>
 </body>
 </html>
