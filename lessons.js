@@ -790,6 +790,92 @@ window.LESSONS = [
       "Return total after the loop, then print the call.",
       "def total_plays(library):\n    total = 0\n    for song in library:\n        total = total + song[\"plays\"]\n    return total\nprint(total_plays(library))"
     ]
+  },
+
+  /* ========================================================
+     PHASE 3 · Dirty data with pandas
+     These lessons set  needsPandas:true  (engine loads pandas
+     on demand) and  dataset:"songs.csv"  (engine fetches the
+     file so the learner's read_csv can find it).
+     ======================================================== */
+
+  /* ---------- Module 14 · Loading a CSV ---------- */
+  {
+    id: "p3-load-1",
+    module: "14 · Loading a CSV",
+    title: "Opening a data file",
+    needsPandas: true,
+    dataset: "songs.csv",
+    concept:
+      "<p>Until now your data was typed into the code by hand. Real data lives in <b>files</b>. The most common kind is a <b>CSV</b> — a plain table of rows and columns, like a spreadsheet.</p>" +
+      "<p><b>pandas</b> is the standard tool for working with tables in Python. By convention you bring it in as <code>pd</code>: <code>import pandas as pd</code>.</p>" +
+      "<p><code>pd.read_csv(\"songs.csv\")</code> reads the file into a table that pandas calls a <b>DataFrame</b>. Its <code>.shape</code> tells you the size as <code>(rows, columns)</code>.</p>",
+    task:
+      "<p>Load <code>songs.csv</code> into a DataFrame called <code>df</code>, then print its shape:</p><pre>(19, 6)</pre>" +
+      "<p>That means 19 songs (rows), each with 6 pieces of information (columns).</p>",
+    starter: "import pandas as pd\n# Load songs.csv into a DataFrame called df, then print df.shape\n",
+    expected: "(19, 6)",
+    hints: [
+      "First read the file into df, then print its shape on the next line.",
+      "Loading: df = pd.read_csv(\"songs.csv\"). The filename goes in quotes.",
+      "import pandas as pd\ndf = pd.read_csv(\"songs.csv\")\nprint(df.shape)"
+    ]
+  },
+  {
+    id: "p3-load-2",
+    module: "14 · Loading a CSV",
+    title: "How many songs?",
+    needsPandas: true,
+    dataset: "songs.csv",
+    concept:
+      "<p>A DataFrame answers questions about itself. The simplest: how many rows does it have?</p>" +
+      "<p><code>len(df)</code> counts the rows — the very same <code>len()</code> you used on lists earlier. Here each row is one song.</p>",
+    task: "<p>Print how many songs are in the data:</p><pre>19</pre>",
+    starter: "import pandas as pd\ndf = pd.read_csv(\"songs.csv\")\n# Print how many songs (rows) are in df\n",
+    expected: "19",
+    hints: [
+      "Wrap df in len(), just like you did with a list.",
+      "Put len(df) inside print().",
+      "print(len(df))"
+    ]
+  },
+  {
+    id: "p3-load-3",
+    module: "14 · Loading a CSV",
+    title: "What information do we have?",
+    needsPandas: true,
+    dataset: "songs.csv",
+    concept:
+      "<p>Before working with data, you check what's in it. <code>df.columns</code> gives the column names. Adding <code>.tolist()</code> turns them into a plain list — the same kind of list you already know.</p>",
+    task: "<p>Print the column names as a list:</p><pre>['title', 'artist', 'plays', 'year', 'duration_sec', 'genre']</pre>",
+    starter: "import pandas as pd\ndf = pd.read_csv(\"songs.csv\")\n# Print the column names as a list\n",
+    expected: "['title', 'artist', 'plays', 'year', 'duration_sec', 'genre']",
+    hints: [
+      "Attach .tolist() to df.columns.",
+      "Put df.columns.tolist() inside print().",
+      "print(df.columns.tolist())"
+    ]
+  },
+  {
+    id: "p3-load-4",
+    module: "14 · Loading a CSV",
+    title: "Peeking at the data",
+    needsPandas: true,
+    dataset: "songs.csv",
+    concept:
+      "<p>You rarely want to print a whole table. <code>df.head()</code> shows just the first 5 rows — enough to see what the data looks like.</p>" +
+      "<p>To look at only some columns, list them in double square brackets: <code>df[[\"title\", \"plays\"]]</code>. The number on the far left is the row number (pandas counts from 0).</p>",
+    task:
+      "<p>Show the first 5 rows of just the <code>title</code> and <code>plays</code> columns:</p>" +
+      "<pre>               title    plays\n0  Bohemian Rhapsody  1426000\n1   We Will Rock You   980000\n2   Somebody to Love   845000\n3     Under Pressure      NaN\n4  Don't Stop Me Now  1200000</pre>" +
+      "<p>Notice row 3 shows <code>NaN</code> — that's a <b>missing value</b>. Real data is full of them, and you'll clean those up soon.</p>",
+    starter: "import pandas as pd\ndf = pd.read_csv(\"songs.csv\")\n# Show the first 5 rows of the title and plays columns\n",
+    expected: "               title    plays\n0  Bohemian Rhapsody  1426000\n1   We Will Rock You   980000\n2   Somebody to Love   845000\n3     Under Pressure      NaN\n4  Don't Stop Me Now  1200000",
+    hints: [
+      "Pick the two columns with double square brackets, then add .head().",
+      "Select first: df[[\"title\", \"plays\"]]  — then attach .head() to it.",
+      "print(df[[\"title\", \"plays\"]].head())"
+    ]
   }
 
 ];
